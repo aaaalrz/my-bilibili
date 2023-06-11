@@ -6,12 +6,30 @@ import requests as r
 from queue import SimpleQueue
 import threading as t
 
+import requests.exceptions
+
 
 def getproxy(n=None):
-    _url = "http://localhost:5555/random"
-    text = r.get(_url).text
+    _url = "http://154.12.55.235:5555/random"
     if n is not None:
         text = n
+    else:
+        text = r.get(_url).text
+    try:
+        b = r.get(
+            _url,
+            params={"term": "一"},
+            proxies={
+                "http": f"http://{text}",
+                "https": f"https://{text}"
+            },
+            # proxies=getproxy("222.179.155.90:9091"),
+            headers={"user-agant": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                   "Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.46 "},
+        )
+    except requests.exceptions.ProxyError:
+        print("ProxyError")
+        return getproxy()
     return {
         "http": f"http://{text}",
         "https": f"https://{text}"
@@ -23,15 +41,12 @@ def get_advice(it):
     b = r.get(
         _url,
         params={"term": it},
-        # proxies={
-        #     "http": "http://127.0.0.1:10809",
-        #     "https": "https://127.0.0.1:10809"
-        # },
-        # proxies=getproxy("222.179.155.90:9091"),
+        # proxies=getproxy(),
+        proxies=getproxy("154.12.37.235:8888"),
         headers={"user-agant": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                                "Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.46 "},
     )
-    print(b.json())
+    print(b.text)
     b.encoding = "utf-8"
     c = json.loads(b.text)
     b.close()
@@ -65,10 +80,10 @@ def find(start, end):
         with open("词典.txt", "a", encoding="utf-8") as f:
             a = get_advice(chr(i))
             print(a)
-            if a != []:
+            if a:
                 f.write(", ".join(a) + ", \n")
         print(i, chr(i))
-        time.sleep(0.17)
+        time.sleep(0)
 
 
 if __name__ == "__main__":
@@ -88,7 +103,7 @@ if __name__ == "__main__":
     # # 扩充C
     # C = t.Thread(target=find, args=(173824, 177972))
     # C.start()
-    find(19968, 40869)
-    find(13312, 19893)
-    find(131072, 173782)
-    find(173824, 177972)
+    find(20117, 40869)
+    # find(13312, 19893)
+    # find(131072, 173782)
+    # find(173824, 177972)
